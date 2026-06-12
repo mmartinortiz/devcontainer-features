@@ -1,0 +1,30 @@
+name: Validate
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON schema
+        run: |
+          for file in src/*/devcontainer-feature.json; do
+            echo "Validating $file"
+            jq empty "$file"
+          done
+
+      - name: Shellcheck
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          for script in src/*/install.sh src/*/test/test.sh scripts/*.sh; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script"
+              shellcheck "$script"
+            fi
+          done

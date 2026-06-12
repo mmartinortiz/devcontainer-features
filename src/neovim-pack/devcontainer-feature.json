@@ -1,0 +1,49 @@
+{
+  "id": "neovim-pack",
+  "version": "1.0.0",
+  "name": "Neovim Pack",
+  "description": "Install Neovim, ast-grep, fzf, and Prettier from GitHub releases",
+  "documentationURL": "https://github.com/manolo/devcontainer-features/tree/main/src/neovim-pack",
+  "options": {
+    "neovimVersion": {
+      "type": "string",
+      "proposals": [
+        "latest",
+        "v0.10.0",
+        "v0.9.0"
+      ],
+      "default": "latest",
+      "description": "Neovim version (e.g., v0.10.0 or latest)"
+    },
+    "astGrepVersion": {
+      "type": "string",
+      "proposals": [
+        "latest",
+        "0.25.0",
+        "0.24.0"
+      ],
+      "default": "latest",
+      "description": "ast-grep version"
+    },
+    "fzfVersion": {
+      "type": "string",
+      "proposals": [
+        "latest",
+        "0.48.0",
+        "0.47.0"
+      ],
+      "default": "latest",
+      "description": "fzf version"
+    },
+    "prettierVersion": {
+      "type": "string",
+      "proposals": [
+        "latest",
+        "3.2.5",
+        "3.1.0"
+      ],
+      "default": "latest",
+      "description": "Prettier version"
+    }
+  }
+}

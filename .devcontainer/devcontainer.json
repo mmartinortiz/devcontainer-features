@@ -1,0 +1,19 @@
+{
+  "name": "DevContainer Features Development",
+  "image": "ubuntu:22.04",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "shellformat.shell-format",
+        "timonwong.shellcheck",
+        "jebbs.plantuml"
+      ]
+    }
+  },
+  "features": {},
+  "onCreateCommand": "apt-get update && apt-get install -y --no-install-recommends git curl jq shellcheck npm",
+  "postCreateCommand": "echo 'DevContainer ready for feature development'",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,readonly"
+  ]
+}

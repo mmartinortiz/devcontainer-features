@@ -1,0 +1,36 @@
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Docker
+.dockerignore
+Dockerfile.local
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+
+# Test artifacts
+test-results/
+coverage/
