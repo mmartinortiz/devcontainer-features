@@ -31,7 +31,7 @@ check_file() {
   fi
 }
 
-check_file /etc/profile.d/neovim-pack-aliases.sh
-check_file /etc/fish/conf.d/neovim-pack-aliases.fish
+check_file /etc/profile.d/neovim-pack.sh
+check_file /etc/fish/conf.d/neovim-pack.fish
 
 echo "All checks passed!"
