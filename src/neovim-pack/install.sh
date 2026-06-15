@@ -14,6 +14,7 @@ LAZYGIT_VERSION="${LAZYGIT_VERSION:-latest}"
 TREE_SITTER_VERSION="${TREE_SITTER_VERSION:-latest}"
 FD_VERSION="${FD_VERSION:-latest}"
 PRETTIER_VERSION="${PRETTIER_VERSION:-latest}"
+SHFMT_VERSION="${SHFMT_VERSION:-latest}"
 
 # Map uname -m to Go arch convention (fzf uses amd64/arm64)
 case "$(uname -m)" in
@@ -117,6 +118,16 @@ $nanolayer_location \
   --option version="$FD_VERSION" \
   --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
 
+# Install shfmt from GitHub releases
+$nanolayer_location \
+  install \
+  devcontainer-feature \
+  "ghcr.io/devcontainers-extra/features/gh-release:1" \
+  --option repo='mvdan/sh' \
+  --option binaryNames='shfmt' \
+  --option version="$SHFMT_VERSION" \
+  --option assetRegex="shfmt_.*_linux_${FZF_ARCH}$"
+
 # Install prettier via npm (requires node)
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js not found, installing via apt..."
@@ -129,21 +140,23 @@ else
   npm install -g "prettier@${PRETTIER_VERSION}"
 fi
 
-# Set up shell aliases for bash/zsh
-cat >/etc/profile.d/neovim-pack-aliases.sh <<'EOF'
+# Set up shell aliases and Mason PATH for bash/zsh
+cat >/etc/profile.d/neovim-pack.sh <<'EOF'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
 alias lg='lazygit'
+export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 EOF
 
-# Set up shell aliases for fish
+# Set up shell aliases and Mason PATH for fish
 mkdir -p /etc/fish/conf.d
-cat >/etc/fish/conf.d/neovim-pack-aliases.fish <<'EOF'
+cat >/etc/fish/conf.d/neovim-pack.fish <<'EOF'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
 alias lg='lazygit'
+fish_add_path -g $HOME/.local/share/nvim/mason/bin
 EOF
 
 echo "Done!"
