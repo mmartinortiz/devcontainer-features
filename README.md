@@ -6,7 +6,7 @@ A minimal collection of development tools packaged as DevContainer features, ins
 
 ### neovim-pack
 
-Install **Neovim**, **ast-grep**, **fzf**, and **Prettier** from GitHub releases in a single feature.
+Install **Neovim**, **ripgrep**, **delta**, **fzf**, **ast-grep**, **lazygit**, **tree-sitter**, **fd**, **shfmt**, and **Prettier** from GitHub releases in a single feature.
 
 ```json
 {
@@ -19,9 +19,15 @@ Install **Neovim**, **ast-grep**, **fzf**, and **Prettier** from GitHub releases
 **Features included:**
 
 - Neovim (nvim) — Hyperextensible Vim-based text editor
-- ast-grep (sg) — Fast code search and rewriting tool
+- ripgrep (rg) — Fast regex search tool
+- delta — Syntax-highlighting pager for git diffs
 - fzf — Fuzzy finder for command line
-- Prettier — Code formatter
+- ast-grep (ast-grep) — Fast code search and rewriting tool
+- lazygit — Terminal UI for git
+- tree-sitter — Parser generator and incremental parsing library
+- fd — Fast file finder
+- shfmt — Shell script formatter
+- Prettier — Code formatter (installed via npm)
 
 [Read full documentation →](./src/neovim-pack/README.md)
 
@@ -35,8 +41,14 @@ Add to your `devcontainer.json`:
   "features": {
     "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "latest",
-      "astGrepVersion": "latest",
+      "ripgrepVersion": "latest",
+      "deltaVersion": "latest",
       "fzfVersion": "latest",
+      "astGrepVersion": "latest",
+      "lazygitVersion": "latest",
+      "treeSitterVersion": "latest",
+      "fdVersion": "latest",
+      "shfmtVersion": "latest",
       "prettierVersion": "latest"
     }
   }
@@ -52,9 +64,15 @@ Control which version of each tool to install:
   "features": {
     "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "v0.10.0",
-      "astGrepVersion": "0.25.0",
-      "fzfVersion": "0.48.0",
-      "prettierVersion": "3.2.5"
+      "ripgrepVersion": "15.1.0",
+      "deltaVersion": "0.19.2",
+      "fzfVersion": "v0.73.1",
+      "astGrepVersion": "0.43.0",
+      "lazygitVersion": "v0.62.2",
+      "treeSitterVersion": "v0.26.9",
+      "fdVersion": "v10.4.2",
+      "shfmtVersion": "v3.13.1",
+      "prettierVersion": "3.5.3"
     }
   }
 }

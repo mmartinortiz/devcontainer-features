@@ -1,13 +1,28 @@
 # Neovim Pack
 
-Install **Neovim**, **ast-grep**, **fzf**, and **Prettier** from GitHub releases in one feature.
+Install **Neovim** and essential CLI tools from GitHub releases in one feature. Designed for LazyVim-based devcontainer setups.
 
 ## What's Included
 
-- **Neovim** (nvim): Hyperextensible Vim-based text editor
-- **ast-grep** (sg): Fast and polyglot tool for code searching, linting, rewriting
-- **fzf**: Fuzzy finder command-line tool
-- **Prettier**: Code formatter supporting multiple languages
+| Tool | Binary | Source |
+|------|--------|--------|
+| [Neovim](https://neovim.io/) | `nvim` | GitHub release |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | `rg` | GitHub release |
+| [delta](https://github.com/dandavison/delta) | `delta` | GitHub release |
+| [fzf](https://github.com/junegunn/fzf) | `fzf` | GitHub release |
+| [ast-grep](https://ast-grep.github.io/) | `ast-grep` | GitHub release |
+| [lazygit](https://github.com/jesseduffield/lazygit) | `lazygit` | GitHub release |
+| [tree-sitter](https://github.com/tree-sitter/tree-sitter) | `tree-sitter` | GitHub release |
+| [fd](https://github.com/sharkdp/fd) | `fd` | GitHub release |
+| [shfmt](https://github.com/mvdan/sh) | `shfmt` | GitHub release |
+| [Prettier](https://prettier.io/) | `prettier` | npm (installs Node.js if needed) |
+
+Shell aliases are set up for all shells (bash, zsh, fish):
+
+- `vim`, `vi`, `v` → `nvim`
+- `lg` → `lazygit`
+
+Mason's bin directory (`~/.local/share/nvim/mason/bin`) is added to PATH for all shells, so Mason-installed LSPs, formatters, and linters are available system-wide.
 
 ## Quick Start
 
@@ -23,25 +38,26 @@ Add to your `devcontainer.json`:
 
 ## Version Selection
 
-Control which version of each tool to install:
+All tools default to `latest`. Pin specific versions as needed:
 
 ```json
 {
   "features": {
     "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
-      "neovimVersion": "latest",
-      "astGrepVersion": "latest",
-      "fzfVersion": "latest",
-      "prettierVersion": "latest"
+      "neovimVersion": "v0.10.0",
+      "ripgrepVersion": "15.1.0",
+      "deltaVersion": "0.19.2",
+      "fzfVersion": "v0.73.1",
+      "astGrepVersion": "0.43.0",
+      "lazygitVersion": "v0.62.2",
+      "treeSitterVersion": "v0.26.9",
+      "fdVersion": "v10.4.2",
+      "shfmtVersion": "v3.13.1",
+      "prettierVersion": "3.5.3"
     }
   }
 }
 ```
-
-### Version Examples
-
-- **Latest**: `"latest"` (default) — fetches current release
-- **Specific version**: `"v0.10.0"` for Neovim, `"0.25.0"` for ast-grep, etc.
 
 Versions are resolved from GitHub releases API. If a version is unavailable, the feature fails loudly.
 
@@ -51,7 +67,9 @@ This feature doesn't enforce config file mounts. You control where your configs 
 
 ### Recommended Mounts (Optional)
 
-Mount your host dotfiles to persist editor/tool configuration:
+Mount your host LazyVim config and plugin data to persist across container rebuilds.
+
+> **Note:** The mount target path depends on the user configured in your devcontainer. Microsoft base images typically use `vscode` as the default user. Adjust the target path to match your `remoteUser` (e.g., `/root` for root, `/home/vscode` for the vscode user).
 
 ```json
 {
@@ -59,16 +77,15 @@ Mount your host dotfiles to persist editor/tool configuration:
     "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   },
   "mounts": [
-    "source=${localEnv:HOME}/.config/nvim,target=/root/.config/nvim,type=bind",
-    "source=${localEnv:HOME}/.config/fzf,target=/root/.config/fzf,type=bind",
-    "source=${localEnv:HOME}/.local/share/nvim,target=/root/.local/share/nvim,type=bind"
+    "source=${localEnv:HOME}/.config/nvim,target=/home/vscode/.config/nvim,type=bind",
+    "source=${localEnv:HOME}/.local/share/nvim,target=/home/vscode/.local/share/nvim,type=bind"
   ]
 }
 ```
 
 ### Without Mounts
 
-The feature creates `/root/.config` directories for each tool, but they start empty. You can initialize configs inside the container.
+Config directories start empty. You can initialize configs inside the container.
 
 ## Troubleshooting
 
@@ -84,14 +101,14 @@ The feature queries GitHub API to resolve `latest` versions. If rate-limited:
 Verify installation completed:
 
 ```bash
-which nvim sg fzf prettier
+which nvim rg delta fzf ast-grep lazygit tree-sitter fd shfmt prettier
 ```
 
 Check error logs during container build.
 
 ### Prettier installation failed
 
-If GitHub release asset unavailable, feature attempts npm fallback. Requires Node.js in base image.
+Prettier is installed via npm. If Node.js is not present in the base image, the feature installs it via apt automatically.
 
 ## Example devcontainer.json
 
@@ -100,21 +117,12 @@ If GitHub release asset unavailable, feature attempts npm fallback. Requires Nod
   "name": "Development",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
-      "neovimVersion": "v0.10.0",
-      "astGrepVersion": "0.25.0",
-      "fzfVersion": "latest",
-      "prettierVersion": "latest"
-    }
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   },
   "mounts": [
-    "source=${localEnv:HOME}/.config/nvim,target=/root/.config/nvim,type=bind"
-  ],
-  "customizations": {
-    "vscode": {
-      "extensions": ["neovim.nvim"]
-    }
-  }
+    "source=${localEnv:HOME}/.config/nvim,target=/home/vscode/.config/nvim,type=bind",
+    "source=${localEnv:HOME}/.local/share/nvim,target=/home/vscode/.local/share/nvim,type=bind"
+  ]
 }
 ```
 
@@ -132,10 +140,3 @@ Tested on Debian-based images:
 - `debian:12`
 
 Works on any Debian/Ubuntu-based image with `curl` available.
-
-## More Information
-
-- [Neovim](https://neovim.io/)
-- [ast-grep](https://ast-grep.github.io/)
-- [fzf](https://github.com/junegunn/fzf)
-- [Prettier](https://prettier.io/)

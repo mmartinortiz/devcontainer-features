@@ -63,13 +63,16 @@ File: `src/neovim-pack/install.sh`
 2. Add installation logic to `src/neovim-pack/install.sh`:
 
    ```bash
-   NEWTOOL_VERSION=${NEWTOOLVERSION:-latest}
+   NEWTOOL_VERSION="${NEWTOOL_VERSION:-latest}"
 
-   if [ "$NEWTOOL_VERSION" = "latest" ]; then
-     NEWTOOL_VERSION=$(resolve_latest_version "owner/repo")
-   fi
-
-   download_and_install ...
+   $nanolayer_location \
+     install \
+     devcontainer-feature \
+     "ghcr.io/devcontainers-extra/features/gh-release:1" \
+     --option repo='owner/repo' \
+     --option binaryNames='newtool' \
+     --option version="$NEWTOOL_VERSION" \
+     --option assetRegex="newtool_.*_linux_${FZF_ARCH}$"
    ```
 
 3. Add verification to `src/neovim-pack/test/test.sh`:
