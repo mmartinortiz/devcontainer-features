@@ -3,7 +3,7 @@ set -e
 
 # Check all binaries exist and are executable
 check() {
-  if command -v "$1" > /dev/null 2>&1; then
+  if command -v "$1" >/dev/null 2>&1; then
     echo "PASS: $1 found at $(command -v "$1")"
   else
     echo "FAIL: $1 not found"
@@ -15,10 +15,11 @@ check nvim
 check rg
 check delta
 check fzf
-check sg
+check ast-grep
 check lazygit
 check tree-sitter
 check fd
+check prettier
 
 # Check alias files exist
 check_file() {

@@ -120,7 +120,7 @@ ensure_nanolayer() {
     # make sure its of the required version
     if ! [[ -z "${nanolayer_location}" ]]; then
       local current_version
-      current_version=$($nanolayer_location --version)
+      current_version=$($nanolayer_location --version | tr -d '[:space:]')
       if ! [[ $current_version == v* ]]; then
         current_version=v$current_version
       fi

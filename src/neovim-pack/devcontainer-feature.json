@@ -1,8 +1,8 @@
 {
   "id": "neovim-pack",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "name": "Neovim Pack",
-  "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, tree-sitter, and fd from GitHub releases",
+  "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, tree-sitter, fd, and prettier from GitHub releases",
   "documentationURL": "https://github.com/mmartinortiz/devcontainer-features/tree/main/src/neovim-pack",
   "options": {
     "neovimVersion": {
@@ -52,6 +52,12 @@
       "proposals": ["latest", "v10.4.2", "v10.2.0"],
       "default": "latest",
       "description": "fd version"
+    },
+    "prettierVersion": {
+      "type": "string",
+      "proposals": ["latest", "3.5.3", "3.4.0"],
+      "default": "latest",
+      "description": "prettier version"
     }
   }
 }

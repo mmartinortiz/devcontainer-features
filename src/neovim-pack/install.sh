@@ -13,6 +13,7 @@ AST_GREP_VERSION="${AST_GREP_VERSION:-latest}"
 LAZYGIT_VERSION="${LAZYGIT_VERSION:-latest}"
 TREE_SITTER_VERSION="${TREE_SITTER_VERSION:-latest}"
 FD_VERSION="${FD_VERSION:-latest}"
+PRETTIER_VERSION="${PRETTIER_VERSION:-latest}"
 
 # Map uname -m to Go arch convention (fzf uses amd64/arm64)
 case "$(uname -m)" in
@@ -115,6 +116,14 @@ $nanolayer_location \
   --option binaryNames='fd' \
   --option version="$FD_VERSION" \
   --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
+
+# Install prettier via npm
+$nanolayer_location \
+  install \
+  devcontainer-feature \
+  "ghcr.io/devcontainers-extra/features/npm-package:1" \
+  --option package='prettier' \
+  --option version="$PRETTIER_VERSION"
 
 # Set up shell aliases for bash/zsh
 cat >/etc/profile.d/neovim-pack-aliases.sh <<'EOF'
