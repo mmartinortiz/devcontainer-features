@@ -9,12 +9,12 @@ for cmd in nvim rg delta; do
     echo "✗ $cmd not found in PATH"
     exit 1
   fi
-  
+
   if ! "$cmd" --version &>/dev/null; then
     echo "✗ $cmd --version failed"
     exit 1
   fi
-  
+
   echo "✓ $cmd installed and working"
 done
 

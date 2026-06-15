@@ -75,12 +75,14 @@ The feature creates `/root/.config` directories for each tool, but they start em
 ### "GitHub API rate limit exceeded"
 
 The feature queries GitHub API to resolve `latest` versions. If rate-limited:
+
 - Pin specific versions instead of `"latest"`
 - Run feature again after rate limit resets (typically 1 hour for anonymous requests)
 
 ### Binary not found in PATH
 
 Verify installation completed:
+
 ```bash
 which nvim sg fzf prettier
 ```
@@ -110,9 +112,7 @@ If GitHub release asset unavailable, feature attempts npm fallback. Requires Nod
   ],
   "customizations": {
     "vscode": {
-      "extensions": [
-        "neovim.nvim"
-      ]
+      "extensions": ["neovim.nvim"]
     }
   }
 }
@@ -126,6 +126,7 @@ If GitHub release asset unavailable, feature attempts npm fallback. Requires Nod
 ## Supported Base Images
 
 Tested on Debian-based images:
+
 - `ubuntu:22.04`
 - `ubuntu:24.04`
 - `debian:12`
