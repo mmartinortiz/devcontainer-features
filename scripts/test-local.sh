@@ -29,14 +29,15 @@ docker run \
   "$CONTAINER_IMAGE" \
   bash -c "
     set -euo pipefail
-    
+
     echo '=== Running feature install.sh ==='
-    bash src/neovim-pack/install.sh
-    
+    cd src/neovim-pack
+    bash install.sh
+
     echo ''
     echo '=== Running feature tests ==='
-    bash src/neovim-pack/test/test.sh
-    
+    bash test/test.sh
+
     echo ''
     echo '✓ All tests passed'
   "

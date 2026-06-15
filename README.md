@@ -17,6 +17,7 @@ Install **Neovim**, **ast-grep**, **fzf**, and **Prettier** from GitHub releases
 ```
 
 **Features included:**
+
 - Neovim (nvim) — Hyperextensible Vim-based text editor
 - ast-grep (sg) — Fast code search and rewriting tool
 - fzf — Fuzzy finder for command line
@@ -69,6 +70,7 @@ Default: `latest` (fetches current release)
 ## Supported Base Images
 
 Tested on Debian-based images:
+
 - `ubuntu:22.04`
 - `ubuntu:24.04`
 - `debian:12`
@@ -127,6 +129,7 @@ test/
 5. GitHub Actions builds and publishes to GHCR
 
 Features are published as:
+
 - `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1` (major)
 - `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1.0.0` (full version)
 - `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:latest`

@@ -1,14 +1,14 @@
-FROM ubuntu:22.04
+FROM ubuntu:26.04
 
 # Install dependencies needed for testing
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    git \
-    jq \
-    shellcheck \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+  curl \
+  ca-certificates \
+  git \
+  jq \
+  shellcheck \
+  npm \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy feature code into container
 COPY src/ /workspace/src/

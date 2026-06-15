@@ -13,25 +13,26 @@ AST_GREP_VERSION="${AST_GREP_VERSION:-latest}"
 LAZYGIT_VERSION="${LAZYGIT_VERSION:-latest}"
 TREE_SITTER_VERSION="${TREE_SITTER_VERSION:-latest}"
 FD_VERSION="${FD_VERSION:-latest}"
+PRETTIER_VERSION="${PRETTIER_VERSION:-latest}"
 
 # Map uname -m to Go arch convention (fzf uses amd64/arm64)
 case "$(uname -m)" in
-  x86_64)  FZF_ARCH="amd64" ;;
-  aarch64) FZF_ARCH="arm64" ;;
-  *)       FZF_ARCH="$(uname -m)" ;;
+x86_64) FZF_ARCH="amd64" ;;
+aarch64) FZF_ARCH="arm64" ;;
+*) FZF_ARCH="$(uname -m)" ;;
 esac
 
 # Map uname -m for lazygit (x86_64 stays, aarch64 -> arm64)
 case "$(uname -m)" in
-  aarch64) LAZYGIT_ARCH="arm64" ;;
-  *)       LAZYGIT_ARCH="$(uname -m)" ;;
+aarch64) LAZYGIT_ARCH="arm64" ;;
+*) LAZYGIT_ARCH="$(uname -m)" ;;
 esac
 
 # Map uname -m for tree-sitter (x86_64 -> x64, aarch64 -> arm64)
 case "$(uname -m)" in
-  x86_64)  TREE_SITTER_ARCH="x64" ;;
-  aarch64) TREE_SITTER_ARCH="arm64" ;;
-  *)       TREE_SITTER_ARCH="$(uname -m)" ;;
+x86_64) TREE_SITTER_ARCH="x64" ;;
+aarch64) TREE_SITTER_ARCH="arm64" ;;
+*) TREE_SITTER_ARCH="$(uname -m)" ;;
 esac
 
 ensure_nanolayer nanolayer_location "0.5.6"
@@ -82,7 +83,7 @@ $nanolayer_location \
   devcontainer-feature \
   "ghcr.io/devcontainers-extra/features/gh-release:1" \
   --option repo='ast-grep/ast-grep' \
-  --option binaryNames='sg' \
+  --option binaryNames='ast-grep' \
   --option version="$AST_GREP_VERSION" \
   --option assetRegex="app-$(uname -m)-unknown-linux-gnu\.zip$"
 
@@ -116,8 +117,16 @@ $nanolayer_location \
   --option version="$FD_VERSION" \
   --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
 
+# Install prettier via npm
+$nanolayer_location \
+  install \
+  devcontainer-feature \
+  "ghcr.io/devcontainers-extra/features/npm-package:1" \
+  --option package='prettier' \
+  --option version="$PRETTIER_VERSION"
+
 # Set up shell aliases for bash/zsh
-cat > /etc/profile.d/neovim-pack-aliases.sh << 'EOF'
+cat >/etc/profile.d/neovim-pack-aliases.sh <<'EOF'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
@@ -126,7 +135,7 @@ EOF
 
 # Set up shell aliases for fish
 mkdir -p /etc/fish/conf.d
-cat > /etc/fish/conf.d/neovim-pack-aliases.fish << 'EOF'
+cat >/etc/fish/conf.d/neovim-pack-aliases.fish <<'EOF'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'

@@ -5,44 +5,52 @@ Devcontainer features mono-repo. Single feature: `neovim-pack` (nvim + ripgrep +
 ## Commands
 
 **Validate only** (fast):
+
 ```bash
 ./scripts/validate.sh
 ```
+
 Checks JSON schema + shellcheck. No Docker needed.
 
 **Full test** (builds container, runs install + tests):
+
 ```bash
 ./scripts/test-local.sh
 ```
+
 Requires Docker. Tests `src/neovim-pack/install.sh` → `src/neovim-pack/test/test.sh`.
 
 **Release** (push to GHCR):
+
 ```bash
 git tag v1.x.y
 git push origin main && git push origin v1.x.y
 ```
+
 GitHub Actions auto-validates, tests, publishes to `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:MAJOR`.
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/neovim-pack/install.sh` | **~44 lines.** Minimal wrapper. Sources `library_scripts.sh`, sets up nanolayer, delegates tool installation to gh-release feature (3 `nanolayer install gh-release` calls for neovim, ripgrep, delta). |
-| `src/neovim-pack/library_scripts.sh` | Shared helpers: `clean_download()` (curl/wget/apt-fallback), `ensure_nanolayer()` (downloads nanolayer from GH). ~173 lines. |
-| `src/neovim-pack/devcontainer-feature.json` | Feature metadata. **camelCase options** (neovimVersion, ripgrepVersion, deltaVersion + stale: astGrepVersion, fzfVersion, prettierVersion). Version **1.1.0**. |
-| `src/neovim-pack/test/test.sh` | Currently empty. |
-| `src/neovim-pack/README.md` | User docs: usage, version pinning, hybrid config mount guidance. |
+| File                                        | Purpose                                                                                                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/neovim-pack/install.sh`                | **~44 lines.** Minimal wrapper. Sources `library_scripts.sh`, sets up nanolayer, delegates tool installation to gh-release feature (3 `nanolayer install gh-release` calls for neovim, ripgrep, delta). |
+| `src/neovim-pack/library_scripts.sh`        | Shared helpers: `clean_download()` (curl/wget/apt-fallback), `ensure_nanolayer()` (downloads nanolayer from GH). ~173 lines.                                                                            |
+| `src/neovim-pack/devcontainer-feature.json` | Feature metadata. **camelCase options** (neovimVersion, ripgrepVersion, deltaVersion + stale: astGrepVersion, fzfVersion, prettierVersion). Version **1.1.0**.                                          |
+| `src/neovim-pack/test/test.sh`              | Currently empty.                                                                                                                                                                                        |
+| `src/neovim-pack/README.md`                 | User docs: usage, version pinning, hybrid config mount guidance.                                                                                                                                        |
 
 ## Architecture (v1.1.0+)
 
 **Delegates to gh-release feature.** install.sh orchestrates nanolayer, which invokes gh-release from devcontainers-extra (`ghcr.io/devcontainers-extra/features/gh-release:1`). gh-release handles: download, extract, binary placement in PATH, asset filtering.
 
 **Installed tools (3):**
+
 - **Neovim** (`neovim/neovim`): `--assetRegex "nvim-linux-$(uname -m)\.tar\.gz$"` — binary: `nvim`
 - **ripgrep** (`BurntSushi/ripgrep`): `--assetRegex "$(uname -m)-unknown-linux-.*\.tar\.gz$"` — binary: `rg`
 - **delta** (`dandavison/delta`): `--assetRegex "$(uname -m)-unknown-linux-.*\.tar\.gz$"` — binary: `delta`
 
 **Version handling:**
+
 - All default to `latest`
 - Users can override via feature options (neovimVersion, ripgrepVersion, deltaVersion)
 
@@ -71,6 +79,7 @@ GitHub Actions auto-validates, tests, publishes to `ghcr.io/mmartinortiz/devcont
 ## Expand
 
 To add tool to neovim-pack:
+
 1. Add camelCase option to `devcontainer-feature.json`
 2. Add default + env var to install.sh
 3. Add `nanolayer install gh-release` call with correct repo, binaryNames, assetRegex

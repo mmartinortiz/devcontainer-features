@@ -2,8 +2,13 @@
   "name": "DevContainer Features Development",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {}
   },
   "remoteUser": "node",
-  "updateContentCommand": "npm install -g @devcontainers/cli"
+  "onCreateCommand": "uv tool install prek",
+  "updateContentCommand": {
+    "devcontainers-cli": "npm install -g @devcontainers/cli",
+    "install pre-commit hooks": "uv tool run prek install-hooks"
+  }
 }
