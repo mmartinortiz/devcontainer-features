@@ -16,7 +16,7 @@ Add to your `devcontainer.json`:
 ```json
 {
   "features": {
-    "ghcr.io/manolo/features/neovim-pack:1": {}
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   }
 }
 ```
@@ -28,7 +28,7 @@ Control which version of each tool to install:
 ```json
 {
   "features": {
-    "ghcr.io/manolo/features/neovim-pack:1": {
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "latest",
       "astGrepVersion": "latest",
       "fzfVersion": "latest",
@@ -56,7 +56,7 @@ Mount your host dotfiles to persist editor/tool configuration:
 ```json
 {
   "features": {
-    "ghcr.io/manolo/features/neovim-pack:1": {}
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   },
   "mounts": [
     "source=${localEnv:HOME}/.config/nvim,target=/root/.config/nvim,type=bind",
@@ -98,7 +98,7 @@ If GitHub release asset unavailable, feature attempts npm fallback. Requires Nod
   "name": "Development",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/manolo/features/neovim-pack:1": {
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "v0.10.0",
       "astGrepVersion": "0.25.0",
       "fzfVersion": "latest",
