@@ -11,7 +11,7 @@ Install **Neovim**, **ast-grep**, **fzf**, and **Prettier** from GitHub releases
 ```json
 {
   "features": {
-    "ghcr.io/manolo/devcontainer-features/neovim-pack:1": {}
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   }
 }
 ```
@@ -32,7 +32,7 @@ Add to your `devcontainer.json`:
 {
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/manolo/devcontainer-features/neovim-pack:1": {
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "latest",
       "astGrepVersion": "latest",
       "fzfVersion": "latest",
@@ -49,7 +49,7 @@ Control which version of each tool to install:
 ```json
 {
   "features": {
-    "ghcr.io/manolo/devcontainer-features/neovim-pack:1": {
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {
       "neovimVersion": "v0.10.0",
       "astGrepVersion": "0.25.0",
       "fzfVersion": "0.48.0",
@@ -127,9 +127,9 @@ test/
 5. GitHub Actions builds and publishes to GHCR
 
 Features are published as:
-- `ghcr.io/manolo/devcontainer-features/neovim-pack:1` (major)
-- `ghcr.io/manolo/devcontainer-features/neovim-pack:1.0.0` (full version)
-- `ghcr.io/manolo/devcontainer-features/neovim-pack:latest`
+- `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1` (major)
+- `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1.0.0` (full version)
+- `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:latest`
 
 ## See Also
 

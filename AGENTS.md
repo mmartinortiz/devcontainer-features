@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Devcontainer features mono-repo. Single feature: `neovim-pack` (nvim + ast-grep + fzf + prettier).
+Devcontainer features mono-repo. Single feature: `neovim-pack` (nvim + ripgrep + delta).
 
 ## Commands
 
@@ -21,63 +21,65 @@ Requires Docker. Tests `src/neovim-pack/install.sh` → `src/neovim-pack/test/te
 git tag v1.x.y
 git push origin main && git push origin v1.x.y
 ```
-GitHub Actions auto-validates, tests, publishes to `ghcr.io/manolo/devcontainer-features/neovim-pack:MAJOR`.
+GitHub Actions auto-validates, tests, publishes to `ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:MAJOR`.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/neovim-pack/install.sh` | Downloads + installs all 4 tools from GH releases. Hard-coded asset patterns per tool. **Arch detection** (x86_64/aarch64) in ~line 10. **Version resolution** via GH API (~line 50-60). Tool installs at ~line 100+. |
-| `src/neovim-pack/devcontainer-feature.json` | Feature metadata. **camelCase options** (neovimVersion, astGrepVersion, fzfVersion, prettierVersion). Version bump here before release. |
-| `src/neovim-pack/test/test.sh` | Verifies all 4 binaries exist + respond to `--version`. |
+| `src/neovim-pack/install.sh` | **~44 lines.** Minimal wrapper. Sources `library_scripts.sh`, sets up nanolayer, delegates tool installation to gh-release feature (3 `nanolayer install gh-release` calls for neovim, ripgrep, delta). |
+| `src/neovim-pack/library_scripts.sh` | Shared helpers: `clean_download()` (curl/wget/apt-fallback), `ensure_nanolayer()` (downloads nanolayer from GH). ~173 lines. |
+| `src/neovim-pack/devcontainer-feature.json` | Feature metadata. **camelCase options** (neovimVersion, ripgrepVersion, deltaVersion + stale: astGrepVersion, fzfVersion, prettierVersion). Version **1.1.0**. |
+| `src/neovim-pack/test/test.sh` | Currently empty. |
 | `src/neovim-pack/README.md` | User docs: usage, version pinning, hybrid config mount guidance. |
+
+## Architecture (v1.1.0+)
+
+**Delegates to gh-release feature.** install.sh orchestrates nanolayer, which invokes gh-release from devcontainers-extra (`ghcr.io/devcontainers-extra/features/gh-release:1`). gh-release handles: download, extract, binary placement in PATH, asset filtering.
+
+**Installed tools (3):**
+- **Neovim** (`neovim/neovim`): `--assetRegex "nvim-linux-$(uname -m)\.tar\.gz$"` — binary: `nvim`
+- **ripgrep** (`BurntSushi/ripgrep`): `--assetRegex "$(uname -m)-unknown-linux-.*\.tar\.gz$"` — binary: `rg`
+- **delta** (`dandavison/delta`): `--assetRegex "$(uname -m)-unknown-linux-.*\.tar\.gz$"` — binary: `delta`
+
+**Version handling:**
+- All default to `latest`
+- Users can override via feature options (neovimVersion, ripgrepVersion, deltaVersion)
 
 ## Conventions
 
-**Version envvar mapping:** camelCase option → UPPERCASE envvar. `neovimVersion` → `NEOVIMVERSION`.
+**Version envvar mapping:** camelCase option → UPPERCASE envvar. `neovimVersion` → `NEOVIM_VERSION`.
 
-**Feature version independent of tool versions.** Feature 1.0.0 ≠ nvim 0.10.0. Semantic versioning: bump minor for new tool/option, patch for bug fix.
+**Feature version independent of tool versions.** Semantic versioning: bump minor for new tool/arch changes, patch for version bumps.
 
-**Asset naming quirks:**
-- Neovim: `nvim-linux-{x86_64|aarch64}.AppImage`
-- ast-grep: `ast-grep-{x86_64|aarch64}-unknown-linux-gnu`
-- fzf: `fzf-{VERSION}-linux_{amd64|arm64}.tar.gz` (note: amd64/arm64, not x86_64/aarch64)
-- Prettier: GH release may not exist; falls back to npm install if available
-
-**Fail loudly.** Install script uses `set -euo pipefail`. No silent failures. GitHub API rate-limit → explicit error.
+**Fail loudly.** `set -e`. No silent failures.
 
 **Idempotent.** Safe to re-run install.sh.
 
 **Hybrid config mounts.** Feature doesn't enforce mounts. README documents recommended mounts (e.g., `~/.config/nvim` → `/root/.config/nvim`). User controls via devcontainer.json.
 
-## Architecture Notes
-
-Single monolithic feature. All tools in one `install.sh`. Test runs both install + verify in sequence.
-
-CI runs on every PR/push (validate + test). Release workflow triggers on `v*` tag.
-
-Base image: ubuntu:22.04 (Debian-based). Requires curl + tar + jq + npm (optional, for prettier fallback).
+**Prefer GitHub releases.** New tools should be installed via `nanolayer install gh-release` using the `ghcr.io/devcontainers-extra/features/gh-release:1` feature. Avoid apt/npm/pip/snap when a GitHub release with prebuilt binaries exists. gh-release gives version pinning, cross-arch support, and no package manager dependencies.
 
 ## Common Gotchas
 
-**fzf asset name uses `amd64`/`arm64`, not `x86_64`/`aarch64`.** Map at top of install.sh.
+**GitHub API rate-limit (60/hr anonymous):** Tests may fail if running multiple times. Solution: use pinned versions.
 
-**Prettier GH release asset naming varies.** Try hardcoded pattern first; npm fallback. Document expected asset name.
+**gh-release asset ambiguity:** Multiple matches error if assetRegex too loose. Use anchors: `\.tar\.gz$` not just `tar.gz`.
 
-**`resolve_latest_version()` queries GH API directly.** Auth not required for public repos but rate-limited (60 req/hr anonymous). Tests may fail under rate limit; pin versions.
-
-**Option value case matters.** `"latest"` string vs unquoted. Test with explicit values.
+**Stale JSON options:** `devcontainer-feature.json` still lists astGrepVersion, fzfVersion, prettierVersion but install.sh no longer installs these tools. Clean up when convenient.
 
 ## Expand
 
 To add tool to neovim-pack:
 1. Add camelCase option to `devcontainer-feature.json`
-2. Map UPPERCASE envvar + resolve latest in `install.sh`
-3. Add download + install logic (hard-code asset pattern)
-4. Add binary + version check to `test/test.sh`
-5. Bump feature minor version
-6. Test: `./scripts/test-local.sh`
+2. Add default + env var to install.sh
+3. Add `nanolayer install gh-release` call with correct repo, binaryNames, assetRegex
+4. Prefer GitHub releases over package managers (npm/apt/pip)
+5. Handle arch-specific quirks via `--assetRegex` if needed
+6. Add binary check to `test/test.sh`
+7. Bump feature minor version
+8. Test: `./scripts/validate.sh && ./scripts/test-local.sh`
 
 ## Use Caveman Skill
 
-All OpenCode sessions use caveman (full). Drop filler, keep technical substance. See `/var/home/manolo/.agents/skills/caveman/SKILL.md`.
+All OpenCode sessions use caveman (full). Drop filler, keep technical substance.
