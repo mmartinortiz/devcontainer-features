@@ -117,13 +117,17 @@ $nanolayer_location \
   --option version="$FD_VERSION" \
   --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
 
-# Install prettier via npm
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/npm-package:1" \
-  --option package='prettier' \
-  --option version="$PRETTIER_VERSION"
+# Install prettier via npm (requires node)
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js not found, installing via apt..."
+  apt-get update -y
+  apt-get install -y --no-install-recommends nodejs npm
+fi
+if [ "$PRETTIER_VERSION" = "latest" ]; then
+  npm install -g prettier
+else
+  npm install -g "prettier@${PRETTIER_VERSION}"
+fi
 
 # Set up shell aliases for bash/zsh
 cat >/etc/profile.d/neovim-pack-aliases.sh <<'EOF'

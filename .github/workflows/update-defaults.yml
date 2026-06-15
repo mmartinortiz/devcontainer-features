@@ -1,0 +1,53 @@
+name: Update Default Versions
+
+on:
+  schedule:
+    # 1st of each month at 09:00 UTC
+    - cron: "0 9 1 * *"
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  update-defaults:
+    name: Update tool default versions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run update-defaults script
+        id: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/update-defaults.sh
+
+      - name: Bump feature patch version
+        if: steps.update.outputs.changes != '0'
+        run: |
+          cd src/neovim-pack
+          current=$(jq -r '.version' devcontainer-feature.json)
+          IFS='.' read -r major minor patch <<< "$current"
+          new="${major}.${minor}.$((patch + 1))"
+          jq --arg v "$new" '.version = $v' devcontainer-feature.json > tmp.json
+          mv tmp.json devcontainer-feature.json
+          echo "new_version=${new}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        if: steps.update.outputs.changes != '0'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update default tool versions"
+          branch: auto/update-defaults
+          delete-branch: true
+          title: "chore: update default tool versions"
+          body: |
+            Automated monthly update of default tool versions in `devcontainer-feature.json`.
+
+            Each version is the latest stable release older than 7 days (avoids shipping
+            day-zero releases to users who rely on `latest`).
+
+            **Review the diff**, merge, and the `auto-tag` workflow will create the release tag.
+          labels: dependencies,automated
+          assignees: mmartinortiz
