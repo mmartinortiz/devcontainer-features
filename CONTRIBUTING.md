@@ -115,7 +115,7 @@ After release, users reference:
 ```json
 {
   "features": {
-    "ghcr.io/manolo/devcontainer-features/neovim-pack:1": {}
+    "ghcr.io/mmartinortiz/devcontainer-features/neovim-pack:1": {}
   }
 }
 ```
