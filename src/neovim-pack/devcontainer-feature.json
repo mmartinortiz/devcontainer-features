@@ -1,77 +1,49 @@
 {
   "id": "neovim-pack",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "name": "Neovim Pack",
   "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, and fd from GitHub releases, with optional pip and Node.js",
   "documentationURL": "https://github.com/mmartinortiz/devcontainer-features/tree/main/src/neovim-pack",
   "options": {
     "neovimVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "v0.10.0",
-        "v0.9.0"
-      ],
+      "proposals": ["latest", "v0.10.0", "v0.9.0"],
       "default": "v0.12.2",
       "description": "Neovim version (e.g., v0.10.0 or latest)"
     },
     "fzfVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "v0.73.1",
-        "v0.57.0"
-      ],
+      "proposals": ["latest", "v0.73.1", "v0.57.0"],
       "default": "v0.73.1",
       "description": "fzf version"
     },
     "astGrepVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "0.38.1",
-        "0.35.0"
-      ],
+      "proposals": ["latest", "0.38.1", "0.35.0"],
       "default": "0.43.0",
       "description": "ast-grep (sg) version"
     },
     "ripgrepVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "15.1.0",
-        "14.1.0"
-      ],
+      "proposals": ["latest", "15.1.0", "14.1.0"],
       "default": "15.1.0",
       "description": "ripgrep (rg) version"
     },
     "deltaVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "0.19.2",
-        "0.18.0"
-      ],
+      "proposals": ["latest", "0.19.2", "0.18.0"],
       "default": "0.19.2",
       "description": "delta version"
     },
     "lazygitVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "v0.62.2",
-        "v0.61.0"
-      ],
+      "proposals": ["latest", "v0.62.2", "v0.61.0"],
       "default": "v0.62.2",
       "description": "lazygit version"
     },
     "fdVersion": {
       "type": "string",
-      "proposals": [
-        "latest",
-        "v10.4.2",
-        "v10.2.0"
-      ],
+      "proposals": ["latest", "v10.4.2", "v10.2.0"],
       "default": "v10.4.2",
       "description": "fd version"
     },
