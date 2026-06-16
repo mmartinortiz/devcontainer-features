@@ -93,6 +93,115 @@ clean_download() {
 
 }
 
+detect_libc() {
+  # Returns "musl" on Alpine/musl systems, "gnu" otherwise
+  if [ -x "/sbin/apk" ]; then
+    echo "musl"
+  elif ldd --version 2>&1 | grep -qi musl; then
+    echo "musl"
+  else
+    echo "gnu"
+  fi
+}
+
+resolve_latest_tag() {
+  # Resolve "latest" to actual tag via HTTP redirect (zero API calls).
+  # GitHub redirects /releases/latest → /releases/tag/{actual_tag}
+  local repo="$1"
+  local url="https://github.com/${repo}/releases/latest"
+  local resolved
+
+  if type curl >/dev/null 2>&1; then
+    resolved=$(curl -fsSL -o /dev/null -w '%{url_effective}' "$url")
+  elif type wget >/dev/null 2>&1; then
+    resolved=$(wget --spider --max-redirect=5 -S "$url" 2>&1 | grep -i 'Location:' | tail -1 | awk '{print $2}' | tr -d '\r')
+  else
+    echo "Error: curl or wget required for resolve_latest_tag" >&2
+    exit 1
+  fi
+
+  # Extract tag from URL: https://github.com/owner/repo/releases/tag/v1.2.3 → v1.2.3
+  echo "${resolved##*/}"
+}
+
+install_gh_release() {
+  # Download a GitHub release asset, extract it, and install the binary.
+  # Zero API calls — constructs direct download URL.
+  #
+  # Usage: install_gh_release <repo> <tag> <asset_filename> <binary_name> [install_tree]
+  #
+  # Handles .tar.gz and .zip assets.
+  # If install_tree is "true", copies the entire extracted directory tree into
+  # /usr/local/ (for tools like neovim that need runtime files alongside the binary).
+  # Otherwise, searches for <binary_name> and copies just that to /usr/local/bin/.
+  local repo="$1"
+  local tag="$2"
+  local asset="$3"
+  local binary="$4"
+  local install_tree="${5:-false}"
+
+  local url="https://github.com/${repo}/releases/download/${tag}/${asset}"
+  local tmp_dir
+  tmp_dir=$(mktemp -d -t gh-release-XXXXXXXXXX)
+
+  echo "Installing ${binary} from ${repo}@${tag}..."
+  echo "  URL: ${url}"
+
+  # Download
+  clean_download "$url" "${tmp_dir}/${asset}"
+
+  # Extract
+  case "$asset" in
+    *.tar.gz|*.tgz)
+      tar xzf "${tmp_dir}/${asset}" -C "$tmp_dir"
+      ;;
+    *.zip)
+      unzip -qo "${tmp_dir}/${asset}" -d "$tmp_dir"
+      ;;
+    *)
+      echo "Error: unsupported asset format: ${asset}" >&2
+      rm -rf "$tmp_dir"
+      exit 1
+      ;;
+  esac
+
+  if [ "$install_tree" = "true" ]; then
+    # Find the top-level extracted directory (e.g. nvim-linux-x86_64/)
+    # and merge its contents into /usr/local/
+    local extracted_dir
+    extracted_dir=$(find "$tmp_dir" -mindepth 1 -maxdepth 1 -type d | head -1)
+    if [ -z "$extracted_dir" ]; then
+      echo "Error: no directory found in extracted archive" >&2
+      rm -rf "$tmp_dir"
+      exit 1
+    fi
+    cp -r "${extracted_dir}"/* /usr/local/
+    echo "  Installed tree: ${extracted_dir##*/}/* → /usr/local/"
+  else
+    # Find and install binary
+    local found
+    found=$(find "$tmp_dir" -name "$binary" -type f -executable | head -1)
+
+    # Some archives have the binary without +x
+    if [ -z "$found" ]; then
+      found=$(find "$tmp_dir" -name "$binary" -type f | head -1)
+    fi
+
+    if [ -z "$found" ]; then
+      echo "Error: binary '${binary}' not found in extracted archive" >&2
+      ls -laR "$tmp_dir" >&2
+      rm -rf "$tmp_dir"
+      exit 1
+    fi
+
+    chmod +x "$found"
+    cp "$found" /usr/local/bin/"$binary"
+    echo "  Installed: /usr/local/bin/${binary}"
+  fi
+
+  rm -rf "$tmp_dir"
+}
+
 ensure_nanolayer() {
   # Ensure existance of the nanolayer cli program
   local variable_name=$1

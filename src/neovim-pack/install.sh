@@ -4,140 +4,121 @@ set -e
 
 source ./library_scripts.sh
 
-# Set defaults for version variables
-NEOVIM_VERSION="${NEOVIM_VERSION:-latest}"
-RIPGREP_VERSION="${RIPGREP_VERSION:-latest}"
-DELTA_VERSION="${DELTA_VERSION:-latest}"
-FZF_VERSION="${FZF_VERSION:-latest}"
-AST_GREP_VERSION="${AST_GREP_VERSION:-latest}"
-LAZYGIT_VERSION="${LAZYGIT_VERSION:-latest}"
-TREE_SITTER_VERSION="${TREE_SITTER_VERSION:-latest}"
-FD_VERSION="${FD_VERSION:-latest}"
-PRETTIER_VERSION="${PRETTIER_VERSION:-latest}"
-SHFMT_VERSION="${SHFMT_VERSION:-latest}"
+# Map devcontainer framework env vars (NEOVIMVERSION) to our vars (NEOVIM_VERSION).
+# Framework strips underscores from camelCase option names → all-uppercase no-underscore.
+NEOVIM_VERSION="${NEOVIMVERSION:-${NEOVIM_VERSION:-latest}}"
+RIPGREP_VERSION="${RIPGREPVERSION:-${RIPGREP_VERSION:-latest}}"
+DELTA_VERSION="${DELTAVERSION:-${DELTA_VERSION:-latest}}"
+FZF_VERSION="${FZFVERSION:-${FZF_VERSION:-latest}}"
+AST_GREP_VERSION="${ASTGREPVERSION:-${AST_GREP_VERSION:-latest}}"
+LAZYGIT_VERSION="${LAZYGITVERSION:-${LAZYGIT_VERSION:-latest}}"
+FD_VERSION="${FDVERSION:-${FD_VERSION:-latest}}"
 
-# Map uname -m to Go arch convention (fzf uses amd64/arm64)
-case "$(uname -m)" in
-x86_64) FZF_ARCH="amd64" ;;
-aarch64) FZF_ARCH="arm64" ;;
-*) FZF_ARCH="$(uname -m)" ;;
-esac
+MACHINE_ARCH="$(uname -m)"
+LIBC_TYPE="$(detect_libc)"
 
-# Map uname -m for lazygit (x86_64 stays, aarch64 -> arm64)
-case "$(uname -m)" in
-aarch64) LAZYGIT_ARCH="arm64" ;;
-*) LAZYGIT_ARCH="$(uname -m)" ;;
-esac
+# ── Arch mappings ─────────────────────────────────────────────────────────────
+# Neovim uses arm64 (not aarch64)
+case "$MACHINE_ARCH" in aarch64) NVIM_ARCH="arm64" ;; *) NVIM_ARCH="$MACHINE_ARCH" ;; esac
 
-# Map uname -m for tree-sitter (x86_64 -> x64, aarch64 -> arm64)
-case "$(uname -m)" in
-x86_64) TREE_SITTER_ARCH="x64" ;;
-aarch64) TREE_SITTER_ARCH="arm64" ;;
-*) TREE_SITTER_ARCH="$(uname -m)" ;;
-esac
+# fzf uses Go convention: amd64/arm64
+case "$MACHINE_ARCH" in x86_64) FZF_ARCH="amd64" ;; aarch64) FZF_ARCH="arm64" ;; *) FZF_ARCH="$MACHINE_ARCH" ;; esac
 
-ensure_nanolayer nanolayer_location "0.5.6"
+# lazygit: x86_64 stays, aarch64 -> arm64
+case "$MACHINE_ARCH" in aarch64) LAZYGIT_ARCH="arm64" ;; *) LAZYGIT_ARCH="$MACHINE_ARCH" ;; esac
 
-# Install neovim from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='neovim/neovim' \
-  --option binaryNames='nvim' \
-  --option version="$NEOVIM_VERSION" \
-  --option assetRegex="nvim-linux-$(uname -m)\.tar\.gz$"
+# ── Resolve "latest" tags (zero API calls — uses HTTP redirect) ──────────────
+resolve_if_latest() {
+  local version="$1" repo="$2"
+  if [ "$version" = "latest" ]; then
+    resolve_latest_tag "$repo"
+  else
+    echo "$version"
+  fi
+}
 
-# Install ripgrep from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='BurntSushi/ripgrep' \
-  --option binaryNames='rg' \
-  --option version="$RIPGREP_VERSION" \
-  --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
+NEOVIM_VERSION=$(resolve_if_latest "$NEOVIM_VERSION" "neovim/neovim")
+RIPGREP_VERSION=$(resolve_if_latest "$RIPGREP_VERSION" "BurntSushi/ripgrep")
+DELTA_VERSION=$(resolve_if_latest "$DELTA_VERSION" "dandavison/delta")
+FZF_VERSION=$(resolve_if_latest "$FZF_VERSION" "junegunn/fzf")
+AST_GREP_VERSION=$(resolve_if_latest "$AST_GREP_VERSION" "ast-grep/ast-grep")
+LAZYGIT_VERSION=$(resolve_if_latest "$LAZYGIT_VERSION" "jesseduffield/lazygit")
+FD_VERSION=$(resolve_if_latest "$FD_VERSION" "sharkdp/fd")
 
-# Install delta from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='dandavison/delta' \
-  --option binaryNames='delta' \
-  --option version="$DELTA_VERSION" \
-  --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
+# ── Helper: strip leading 'v' from tag ───────────────────────────────────────
+strip_v() { echo "${1#v}"; }
 
-# Install fzf from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='junegunn/fzf' \
-  --option binaryNames='fzf' \
-  --option version="$FZF_VERSION" \
-  --option assetRegex="linux_${FZF_ARCH}\.tar\.gz$"
+# ── Install tools via direct download (zero API calls) ───────────────────────
 
-# Install ast-grep from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='ast-grep/ast-grep' \
-  --option binaryNames='ast-grep' \
-  --option version="$AST_GREP_VERSION" \
-  --option assetRegex="app-$(uname -m)-unknown-linux-gnu\.zip$"
+# Neovim: nvim-linux-{arm64|x86_64}.tar.gz (no version in filename)
+# Neovim needs full tree install (bin/nvim + lib/nvim/ + share/nvim/runtime/)
+install_gh_release "neovim/neovim" "$NEOVIM_VERSION" \
+  "nvim-linux-${NVIM_ARCH}.tar.gz" "nvim" "true"
 
-# Install lazygit from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='jesseduffield/lazygit' \
-  --option binaryNames='lazygit' \
-  --option version="$LAZYGIT_VERSION" \
-  --option assetRegex="linux_${LAZYGIT_ARCH}\.tar\.gz$"
+# ripgrep: ripgrep-{ver}-{arch}-unknown-linux-musl.tar.gz
+# Note: ripgrep ships x86_64 as musl-only (no gnu). musl binaries work on glibc systems.
+RG_VER=$(strip_v "$RIPGREP_VERSION")
+install_gh_release "BurntSushi/ripgrep" "$RIPGREP_VERSION" \
+  "ripgrep-${RG_VER}-${MACHINE_ARCH}-unknown-linux-musl.tar.gz" "rg"
 
-# Install tree-sitter CLI from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='tree-sitter/tree-sitter' \
-  --option binaryNames='tree-sitter' \
-  --option version="$TREE_SITTER_VERSION" \
-  --option assetRegex="tree-sitter-cli-linux-${TREE_SITTER_ARCH}\.zip$"
+# delta: delta-{ver}-{arch}-unknown-linux-gnu.tar.gz
+DELTA_VER=$(strip_v "$DELTA_VERSION")
+install_gh_release "dandavison/delta" "$DELTA_VERSION" \
+  "delta-${DELTA_VER}-${MACHINE_ARCH}-unknown-linux-${LIBC_TYPE}.tar.gz" "delta"
 
-# Install fd from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='sharkdp/fd' \
-  --option binaryNames='fd' \
-  --option version="$FD_VERSION" \
-  --option assetRegex="$(uname -m)-unknown-linux-.*\.tar\.gz$"
+# fzf: fzf-{ver}-linux_{amd64|arm64}.tar.gz
+FZF_VER=$(strip_v "$FZF_VERSION")
+install_gh_release "junegunn/fzf" "$FZF_VERSION" \
+  "fzf-${FZF_VER}-linux_${FZF_ARCH}.tar.gz" "fzf"
 
-# Install shfmt from GitHub releases
-$nanolayer_location \
-  install \
-  devcontainer-feature \
-  "ghcr.io/devcontainers-extra/features/gh-release:1" \
-  --option repo='mvdan/sh' \
-  --option binaryNames='shfmt' \
-  --option version="$SHFMT_VERSION" \
-  --option assetRegex="shfmt_.*_linux_${FZF_ARCH}$"
+# ast-grep: app-{arch}-unknown-linux-gnu.zip (no version in filename)
+install_gh_release "ast-grep/ast-grep" "$AST_GREP_VERSION" \
+  "app-${MACHINE_ARCH}-unknown-linux-gnu.zip" "ast-grep"
 
-# Install prettier via npm (requires node)
-if ! command -v node >/dev/null 2>&1; then
-  echo "Node.js not found, installing via apt..."
-  apt-get update -y
-  apt-get install -y --no-install-recommends nodejs npm
+# lazygit: lazygit_{ver}_linux_{x86_64|arm64}.tar.gz
+LAZYGIT_VER=$(strip_v "$LAZYGIT_VERSION")
+install_gh_release "jesseduffield/lazygit" "$LAZYGIT_VERSION" \
+  "lazygit_${LAZYGIT_VER}_Linux_${LAZYGIT_ARCH}.tar.gz" "lazygit"
+
+# fd: fd-{tag}-{arch}-unknown-linux-{gnu|musl}.tar.gz (tag keeps v prefix)
+install_gh_release "sharkdp/fd" "$FD_VERSION" \
+  "fd-${FD_VERSION}-${MACHINE_ARCH}-unknown-linux-${LIBC_TYPE}.tar.gz" "fd"
+
+# Install pip if requested
+if [ "${INSTALLPIP}" = "true" ]; then
+  # Find python3 - check PATH first, then common install locations
+  PYTHON3=""
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON3="python3"
+  elif [ -x /usr/local/python/current/bin/python3 ]; then
+    PYTHON3="/usr/local/python/current/bin/python3"
+  elif [ -x /usr/bin/python3 ]; then
+    PYTHON3="/usr/bin/python3"
+  fi
+
+  # Install python3 via apt if not found
+  if [ -z "$PYTHON3" ]; then
+    echo "python3 not found, installing via apt..."
+    apt-get update -y && apt-get install -y --no-install-recommends python3
+    PYTHON3="python3"
+  fi
+
+  if ! $PYTHON3 -m ensurepip --upgrade 2>/dev/null; then
+    echo "ensurepip not available, installing pip via apt..."
+    apt-get update -y && apt-get install -y --no-install-recommends python3-pip
+  fi
+  # Best-effort upgrade (may fail on externally-managed environments)
+  $PYTHON3 -m pip install --break-system-packages --upgrade pip 2>/dev/null || true
 fi
-if [ "$PRETTIER_VERSION" = "latest" ]; then
-  npm install -g prettier
-else
-  npm install -g "prettier@${PRETTIER_VERSION}"
+
+# Install Node.js if requested (only use that still needs nanolayer)
+if [ "${INSTALLNODE}" = "true" ]; then
+  ensure_nanolayer nanolayer_location "0.5.6"
+  $nanolayer_location \
+    install \
+    devcontainer-feature \
+    "ghcr.io/devcontainers/features/node:2" \
+    --option version='lts'
 fi
 
 # Set up shell aliases and Mason PATH for bash/zsh

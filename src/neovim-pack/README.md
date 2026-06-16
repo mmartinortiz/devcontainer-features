@@ -12,10 +12,16 @@ Install **Neovim** and essential CLI tools from GitHub releases in one feature. 
 | [fzf](https://github.com/junegunn/fzf) | `fzf` | GitHub release |
 | [ast-grep](https://ast-grep.github.io/) | `ast-grep` | GitHub release |
 | [lazygit](https://github.com/jesseduffield/lazygit) | `lazygit` | GitHub release |
-| [tree-sitter](https://github.com/tree-sitter/tree-sitter) | `tree-sitter` | GitHub release |
 | [fd](https://github.com/sharkdp/fd) | `fd` | GitHub release |
-| [shfmt](https://github.com/mvdan/sh) | `shfmt` | GitHub release |
-| [Prettier](https://prettier.io/) | `prettier` | npm (installs Node.js if needed) |
+
+### Optional Tools
+
+| Tool | Option | Source | Requirement |
+|------|--------|--------|-------------|
+| pip | `"installPip": true` | ensurepip / apt | none (installs python3 if needed) |
+| [Node.js](https://nodejs.org/) | `"installNode": true` | [devcontainers/features/node](https://github.com/devcontainers/features/tree/main/src/node) | none (includes npm) |
+
+> **Note:** pip is installed for Neovim/Mason tooling, not for general Python development. If python3 is not present in the base image, it will be installed via apt automatically.
 
 Shell aliases are set up for all shells (bash, zsh, fish):
 
@@ -50,10 +56,9 @@ All tools default to `latest`. Pin specific versions as needed:
       "fzfVersion": "v0.73.1",
       "astGrepVersion": "0.43.0",
       "lazygitVersion": "v0.62.2",
-      "treeSitterVersion": "v0.26.9",
       "fdVersion": "v10.4.2",
-      "shfmtVersion": "v3.13.1",
-      "prettierVersion": "3.5.3"
+      "installPip": true,
+      "installNode": true
     }
   }
 }
@@ -101,14 +106,14 @@ The feature queries GitHub API to resolve `latest` versions. If rate-limited:
 Verify installation completed:
 
 ```bash
-which nvim rg delta fzf ast-grep lazygit tree-sitter fd shfmt prettier
+which nvim rg delta fzf ast-grep lazygit fd
 ```
 
 Check error logs during container build.
 
-### Prettier installation failed
+### pip installation failed
 
-Prettier is installed via npm. If Node.js is not present in the base image, the feature installs it via apt automatically.
+If python3 is not found, it is installed via apt automatically. If ensurepip also fails, pip is installed via `apt-get install python3-pip`. Check the container build logs for details.
 
 ## Example devcontainer.json
 
