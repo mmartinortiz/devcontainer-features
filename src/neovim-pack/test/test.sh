@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+# Source nvm if installed (node feature sets up PATH in bash profile)
+export NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
 # Check all binaries exist and are executable
 check() {
   if command -v "$1" >/dev/null 2>&1; then
@@ -17,9 +22,10 @@ check delta
 check fzf
 check ast-grep
 check lazygit
-check tree-sitter
 check fd
-check prettier
+check pip3
+check node
+check npm
 
 # Check alias files exist
 check_file() {

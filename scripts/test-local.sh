@@ -32,7 +32,7 @@ docker run \
 
     echo '=== Running feature install.sh ==='
     cd src/neovim-pack
-    bash install.sh
+    INSTALLPIP=true INSTALLNODE=true bash install.sh
 
     echo ''
     echo '=== Running feature tests ==='

@@ -1,8 +1,8 @@
 {
   "id": "neovim-pack",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "name": "Neovim Pack",
-  "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, tree-sitter, fd, shfmt, and prettier from GitHub releases",
+  "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, and fd from GitHub releases, with optional pip and Node.js",
   "documentationURL": "https://github.com/mmartinortiz/devcontainer-features/tree/main/src/neovim-pack",
   "options": {
     "neovimVersion": {
@@ -65,16 +65,6 @@
       "default": "v0.62.2",
       "description": "lazygit version"
     },
-    "treeSitterVersion": {
-      "type": "string",
-      "proposals": [
-        "latest",
-        "v0.26.9",
-        "v0.25.0"
-      ],
-      "default": "v0.26.9",
-      "description": "tree-sitter CLI version"
-    },
     "fdVersion": {
       "type": "string",
       "proposals": [
@@ -85,25 +75,15 @@
       "default": "v10.4.2",
       "description": "fd version"
     },
-    "prettierVersion": {
-      "type": "string",
-      "proposals": [
-        "latest",
-        "3.5.3",
-        "3.4.0"
-      ],
-      "default": "4.0.0-alpha.9",
-      "description": "prettier version"
+    "installPip": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install pip (installs python3 via apt if needed)"
     },
-    "shfmtVersion": {
-      "type": "string",
-      "proposals": [
-        "latest",
-        "v3.13.1",
-        "v3.12.0"
-      ],
-      "default": "latest",
-      "description": "shfmt version"
+    "installNode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install Node.js via devcontainers/features/node"
     }
   }
 }

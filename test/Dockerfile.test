@@ -1,4 +1,4 @@
-FROM ubuntu:26.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 # Install dependencies needed for testing
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
   jq \
   shellcheck \
-  npm \
   && rm -rf /var/lib/apt/lists/*
 
 # Copy feature code into container
