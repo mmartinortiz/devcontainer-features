@@ -21,7 +21,7 @@ Install **Neovim** and essential CLI tools from GitHub releases in one feature. 
 | pip | `"installPip": true` | ensurepip / apt | none (installs python3 if needed) |
 | [Node.js](https://nodejs.org/) | `"installNode": true` | [devcontainers/features/node](https://github.com/devcontainers/features/tree/main/src/node) | none (includes npm) |
 
-> **Note:** pip is installed for Neovim/Mason tooling, not for general Python development. If python3 is not present in the base image, it will be installed via apt automatically.
+> **Note:** pip is installed for Neovim/Mason tooling, not for general Python development. If python3 is not present in the base image, it will be installed via apt automatically. `python3-venv` is also installed if not already available, enabling virtual environment support for Mason and other tools.
 
 Shell aliases are set up for all shells (bash, zsh, fish):
 
@@ -113,7 +113,7 @@ Check error logs during container build.
 
 ### pip installation failed
 
-If python3 is not found, it is installed via apt automatically. If ensurepip also fails, pip is installed via `apt-get install python3-pip`. Check the container build logs for details.
+If python3 is not found, it is installed via apt automatically. If ensurepip also fails, pip is installed via `apt-get install python3-pip`. `python3-venv` is installed when not already present (needed by Mason for virtual environments). Check the container build logs for details.
 
 ## Example devcontainer.json
 

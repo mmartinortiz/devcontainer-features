@@ -109,6 +109,12 @@ if [ "${INSTALLPIP}" = "true" ]; then
   fi
   # Best-effort upgrade (may fail on externally-managed environments)
   $PYTHON3 -m pip install --break-system-packages --upgrade pip 2>/dev/null || true
+
+  # Install python3-venv for virtual environment support (needed by Mason, etc.)
+  if ! $PYTHON3 -m venv --help >/dev/null 2>&1; then
+    echo "python3-venv not available, installing via apt..."
+    apt-get update -y && apt-get install -y --no-install-recommends python3-venv
+  fi
 fi
 
 # Install Node.js if requested (only use that still needs nanolayer)
