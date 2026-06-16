@@ -50,17 +50,34 @@ jobs:
           load: true
           tags: devcontainer-features:test
 
-      - name: Run feature installation and tests
+      - name: Test default install (core tools only)
         run: |
           docker run \
             --rm \
             devcontainer-features:test \
             bash -c "
               set -euo pipefail
-              echo '=== Running feature install.sh ==='
+              echo '=== Running feature install.sh (defaults) ==='
               cd src/neovim-pack
               bash install.sh
               echo ''
-              echo '=== Running feature tests ==='
+              echo '=== Running feature tests (defaults) ==='
+              bash test/test.sh
+            "
+
+      - name: Test with optional tools (pip + node)
+        run: |
+          docker run \
+            --rm \
+            -e INSTALLPIP=true \
+            -e INSTALLNODE=true \
+            devcontainer-features:test \
+            bash -c "
+              set -euo pipefail
+              echo '=== Running feature install.sh (pip + node) ==='
+              cd src/neovim-pack
+              bash install.sh
+              echo ''
+              echo '=== Running feature tests (pip + node) ==='
               bash test/test.sh
             "

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-# Source nvm if installed (node feature sets up PATH in bash profile)
+# Source nvm if node was installed (sets up PATH)
 export NVM_DIR="${NVM_DIR:-/usr/local/share/nvm}"
 # shellcheck disable=SC1091
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-# Check all binaries exist and are executable
+# Check a binary exists and is executable
 check() {
   if command -v "$1" >/dev/null 2>&1; then
     echo "PASS: $1 found at $(command -v "$1")"
@@ -16,6 +16,7 @@ check() {
   fi
 }
 
+# Core tools (always installed)
 check nvim
 check rg
 check delta
@@ -23,9 +24,17 @@ check fzf
 check ast-grep
 check lazygit
 check fd
-check pip3
-check node
-check npm
+
+# Optional: pip (only when installPip=true)
+if [ "${INSTALLPIP}" = "true" ]; then
+  check pip3
+fi
+
+# Optional: node (only when installNode=true)
+if [ "${INSTALLNODE}" = "true" ]; then
+  check node
+  check npm
+fi
 
 # Check alias files exist
 check_file() {
