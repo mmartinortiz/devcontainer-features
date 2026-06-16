@@ -1,6 +1,6 @@
 {
   "id": "neovim-pack",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "name": "Neovim Pack",
   "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, and fd from GitHub releases, with optional pip and Node.js",
   "documentationURL": "https://github.com/mmartinortiz/devcontainer-features/tree/main/src/neovim-pack",
