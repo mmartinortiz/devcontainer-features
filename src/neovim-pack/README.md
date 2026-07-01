@@ -64,7 +64,7 @@ All tools default to `latest`. Pin specific versions as needed:
 }
 ```
 
-Versions are resolved from GitHub releases API. If a version is unavailable, the feature fails loudly.
+Versions are resolved via GitHub releases (HTTP redirect, no API calls). If a version is unavailable, the feature fails loudly.
 
 ## Configuration: Mounting Host Dotfiles
 
@@ -94,12 +94,12 @@ Config directories start empty. You can initialize configs inside the container.
 
 ## Troubleshooting
 
-### "GitHub API rate limit exceeded"
+### "latest" version resolution fails
 
-The feature queries GitHub API to resolve `latest` versions. If rate-limited:
+The feature resolves `latest` via an HTTP redirect from GitHub (`/releases/latest` → 302). No API calls are made. If resolution fails:
 
 - Pin specific versions instead of `"latest"`
-- Run feature again after rate limit resets (typically 1 hour for anonymous requests)
+- Check network connectivity to `github.com`
 
 ### Binary not found in PATH
 
