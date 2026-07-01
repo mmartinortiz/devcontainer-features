@@ -45,6 +45,8 @@ jobs:
           git add src/neovim-pack/devcontainer-feature.json
           git commit -m "chore: update default tool versions"
           git push -f origin "$branch"
+          gh label create "dependencies" --color "0366d6" --description "Dependency updates" 2>/dev/null || true
+          gh label create "automated" --color "ededed" --description "Created by automation" 2>/dev/null || true
           existing=$(gh pr list --head "$branch" --json number -q '.[0].number' || true)
           if [[ -n "$existing" ]]; then
             echo "PR #${existing} already exists, branch updated"
