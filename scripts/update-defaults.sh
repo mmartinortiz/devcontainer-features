@@ -2,8 +2,7 @@
 # shellcheck disable=SC2155
 #
 # update-defaults.sh — For each tool in neovim-pack, find the latest GitHub
-# release (or npm version for prettier) that is older than 7 days. Update
-# devcontainer-feature.json default values accordingly.
+# release older than 7 days. Update devcontainer-feature.json defaults.
 #
 # Requires: curl, jq
 # Optional: GITHUB_TOKEN env var (raises API rate limit from 60→5000/hr)
@@ -21,7 +20,6 @@ GH_TOOLS=(
   "junegunn/fzf fzfVersion"
   "ast-grep/ast-grep astGrepVersion"
   "jesseduffield/lazygit lazygitVersion"
-  "tree-sitter/tree-sitter treeSitterVersion"
   "sharkdp/fd fdVersion"
 )
 
@@ -58,29 +56,6 @@ gh_stable_version() {
   '
 }
 
-# Find latest npm version older than $MIN_AGE_DAYS days.
-npm_stable_version() {
-  local package="$1"
-  local cutoff
-  cutoff=$(date -u -d "${MIN_AGE_DAYS} days ago" +%s 2>/dev/null \
-        || date -u -v-"${MIN_AGE_DAYS}"d +%s)
-
-  local registry
-  registry=$(curl -fsSL "https://registry.npmjs.org/${package}")
-
-  echo "$registry" | jq -r --argjson cutoff "$cutoff" '
-    .time as $times |
-    [ .versions | keys[] ] |
-    map(select(. as $v |
-      ($times[$v] // empty) |
-      sub("\\.[0-9]+Z$"; "Z") |
-      strptime("%Y-%m-%dT%H:%M:%SZ") |
-      mktime < $cutoff
-    )) |
-    last // empty
-  '
-}
-
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 changes=0
@@ -109,25 +84,6 @@ for entry in "${GH_TOOLS[@]}"; do
   mv "${FEATURE_JSON}.tmp" "$FEATURE_JSON"
   changes=$((changes + 1))
 done
-
-# Handle prettier (npm)
-echo "Checking prettier (npm)..."
-prettier_ver=$(npm_stable_version "prettier")
-
-if [[ -n "$prettier_ver" ]]; then
-  current=$(jq -r '.options.prettierVersion.default' "$FEATURE_JSON")
-  if [[ "$current" != "$prettier_ver" ]]; then
-    echo "  → Updating prettierVersion: ${current} → ${prettier_ver}"
-    jq --arg ver "$prettier_ver" \
-      '.options.prettierVersion.default = $ver' "$FEATURE_JSON" > "${FEATURE_JSON}.tmp"
-    mv "${FEATURE_JSON}.tmp" "$FEATURE_JSON"
-    changes=$((changes + 1))
-  else
-    echo "  ✓ Already at ${prettier_ver}"
-  fi
-else
-  echo "  ⚠ No version older than ${MIN_AGE_DAYS}d found, keeping current default"
-fi
 
 echo ""
 echo "Total changes: ${changes}"

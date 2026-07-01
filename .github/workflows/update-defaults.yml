@@ -33,21 +33,30 @@ jobs:
           mv tmp.json devcontainer-feature.json
           echo "new_version=${new}" >> "$GITHUB_OUTPUT"
 
-      - name: Create Pull Request
+      - name: Commit and create PR
         if: steps.update.outputs.changes != '0'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update default tool versions"
-          branch: auto/update-defaults
-          delete-branch: true
-          title: "chore: update default tool versions"
-          body: |
-            Automated monthly update of default tool versions in `devcontainer-feature.json`.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="auto/update-defaults"
+          git checkout -B "$branch"
+          git add src/neovim-pack/devcontainer-feature.json
+          git commit -m "chore: update default tool versions"
+          git push -f origin "$branch"
+          existing=$(gh pr list --head "$branch" --json number -q '.[0].number' || true)
+          if [[ -n "$existing" ]]; then
+            echo "PR #${existing} already exists, branch updated"
+          else
+            gh pr create \
+              --title "chore: update default tool versions" \
+              --body "Automated monthly update of default tool versions in \`devcontainer-feature.json\`.
 
-            Each version is the latest stable release older than 7 days (avoids shipping
-            day-zero releases to users who rely on `latest`).
+          Each version is the latest stable release older than 7 days (avoids shipping
+          day-zero releases to users who rely on \`latest\`).
 
-            **Review the diff**, merge, and the `auto-tag` workflow will create the release tag.
-          labels: dependencies,automated
-          assignees: mmartinortiz
+          **Review the diff**, merge, and the \`auto-tag\` workflow will create the release tag." \
+              --label "dependencies,automated" \
+              --assignee "mmartinortiz"
+          fi
