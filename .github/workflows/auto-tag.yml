@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,3 +35,6 @@ jobs:
           echo "Creating tag ${tag}"
           git tag "$tag"
           git push origin "$tag"
+
+          echo "Triggering release workflow"
+          gh workflow run release.yml --ref "$tag" -f tag="$tag"
