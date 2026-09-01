@@ -1,6 +1,6 @@
 {
   "id": "neovim-pack",
-  "version": "1.10.4",
+  "version": "1.10.5",
   "name": "Neovim Pack",
   "description": "Install Neovim, ripgrep, delta, fzf, ast-grep, lazygit, and fd from GitHub releases, with optional pip and Node.js",
   "documentationURL": "https://github.com/mmartinortiz/devcontainer-features/tree/main/src/neovim-pack",
@@ -12,7 +12,7 @@
         "v0.10.0",
         "v0.9.0"
       ],
-      "default": "v0.12.4",
+      "default": "v0.12.5",
       "description": "Neovim version (e.g., v0.10.0 or latest)"
     },
     "fzfVersion": {
@@ -22,7 +22,7 @@
         "v0.73.1",
         "v0.57.0"
       ],
-      "default": "v0.74.1",
+      "default": "v0.74.3",
       "description": "fzf version"
     },
     "astGrepVersion": {
@@ -32,7 +32,7 @@
         "0.38.1",
         "0.35.0"
       ],
-      "default": "0.45.0",
+      "default": "0.45.2",
       "description": "ast-grep (sg) version"
     },
     "ripgrepVersion": {
@@ -62,7 +62,7 @@
         "v0.62.2",
         "v0.61.0"
       ],
-      "default": "v0.63.1",
+      "default": "v0.64.1",
       "description": "lazygit version"
     },
     "fdVersion": {
